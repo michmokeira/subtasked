@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
-from . import crud, models, schemas
+from . import crud, models, schemas, routes
 from .db import engine, get_db
 
 app = FastAPI()
@@ -18,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include task and subtask routes
+app.include_router(routes.router)
 
 # -------- Root Route --------
 @app.get("/")
