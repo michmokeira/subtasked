@@ -104,7 +104,13 @@
   - Style with dark cards and spooky icons
   - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-- [ ] 6. Build ToastNotification system
+- [x] 6. Build ToastNotification system
+
+
+
+
+
+
   - Create ToastNotification component with message, type, and duration props
   - Implement toast container with positioning
   - Add spooky type with ghost icon and gradient background
@@ -113,7 +119,12 @@
   - Style with eerie effects and animations
   - _Requirements: 14.2, 8.4_
 
-- [ ] 7. Create MoonPhaseIndicator component
+- [x] 7. Create MoonPhaseIndicator component
+
+
+
+
+
   - Build SVG-based moon visualization
   - Implement phase calculation based on completion percentage
   - Create clip-path logic for moon phases (new moon, crescent, half, gibbous, full)
@@ -121,7 +132,12 @@
   - Style with glowing effects
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 8. Build SubtaskItem component
+- [x] 8. Build SubtaskItem component
+
+
+
+
+
   - Create component accepting subtask and onToggle props
   - Implement checkbox with focus level styling (purple glow for deep, orange for shallow)
   - Add focus level indicator badge

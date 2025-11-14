@@ -2,6 +2,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
+import ToastContainer from '../components/ToastContainer';
 
 export default function MainLayout() {
   const location = useLocation();
@@ -26,6 +27,9 @@ export default function MainLayout() {
           </div>
         )}
       </div>
+
+      {/* Toast notifications */}
+      <ToastContainer />
     </div>
   );
 }
