@@ -145,7 +145,12 @@
   - Add hover effects
   - _Requirements: 3.1, 3.2, 3.4_
 
-- [ ] 9. Build TaskCard component
+- [x] 9. Build TaskCard component
+
+
+
+
+
   - Create component accepting task, onComplete, onDelete, isHaunted props
   - Implement task display with title, description, time estimates
   - Render subtasks using SubtaskItem component
@@ -155,7 +160,12 @@
   - Implement spirit release animation when all subtasks complete
   - _Requirements: 2.2, 3.3, 5.1, 5.2, 5.3, 11.3_
 
-- [ ] 10. Build GoalCard component
+- [x] 10. Build GoalCard component
+
+
+
+
+
   - Create component accepting goal and action handlers
   - Implement candle icon with flicker animation
   - Add goal title, description, and deadline display
@@ -164,7 +174,12 @@
   - Implement candle lighting animation on creation
   - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 11. Update MainLayout component
+- [x] 11. Update MainLayout component
+
+
+
+
+
   - Wrap layout with ThemeProvider
   - Add ToastContainer to layout
   - Implement FogTransition wrapper for Outlet
@@ -172,7 +187,14 @@
   - Apply Halloween theme styling
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 12. Update Sidebar component
+- [x] 12. Update Sidebar component
+
+
+
+
+
+
+
   - Replace icons with Halloween-themed icons (ghost, pumpkin, bat, candle, skull, gear)
   - Implement glow pulse hover effect with Framer Motion
   - Add neon orange glow on hover
@@ -180,7 +202,12 @@
   - Style with dark background and themed colors
   - _Requirements: 11.1, 11.2_
 
-- [ ] 13. Implement Dashboard page
+- [x] 13. Implement Dashboard page
+
+
+
+
+
   - Add "Subtasked: Night Shift" title with spooky font
   - Integrate MoonPhaseIndicator component
   - Create StatCard components for task and goal counts
@@ -190,7 +217,10 @@
   - Apply FogTransition wrapper
   - _Requirements: 1.4, 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 14. Implement Tasks page
+- [x] 14. Implement Tasks page
+
+
+
   - Create task list layout with "Tasks" heading
   - Add "New Task" button with modal
   - Fetch tasks from API on mount
