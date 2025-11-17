@@ -1,0 +1,54 @@
+/* MainLayout.css - Force sidebar and bottom nav positioning */
+
+.layout-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.desktop-sidebar {
+  width: 256px;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.main-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  position: relative;
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* Desktop: Show sidebar, hide bottom nav */
+@media (min-width: 768px) {
+  .desktop-sidebar {
+    display: block !important;
+  }
+  
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+/* Mobile: Hide sidebar, show bottom nav */
+@media (max-width: 767px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+  
+  .mobile-bottom-nav {
+    display: block !important;
+  }
+}
