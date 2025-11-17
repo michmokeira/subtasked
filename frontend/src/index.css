@@ -23,12 +23,27 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a0a0a 0%, #4a148c 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1e0e2a 100%);
+  color: #b0a8b9;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Prevent horizontal overflow on mobile */
+@media (max-width: 767px) {
+  * {
+    max-width: 100vw;
+  }
+  
+  body, #root {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
 }
 
 /* Custom scrollbar styling */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -36,38 +51,38 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #4a148c 0%, #ff6f00 100%);
-  border-radius: 6px;
+  background: #1e0e2a;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #6a1bb0 0%, #ff8f20 100%);
+  background: #ff7b00;
 }
 
 /* Halloween theme gradients */
 .gradient-halloween {
-  background: linear-gradient(135deg, #4a148c 0%, #ff6f00 100%);
+  background: linear-gradient(135deg, #1e0e2a 0%, #ff7b00 100%);
 }
 
 .gradient-dark {
-  background: linear-gradient(180deg, #0a0a0a 0%, #4a148c 100%);
+  background: linear-gradient(180deg, #0a0a0a 0%, #1e0e2a 100%);
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Creepster', cursive;
-  color: #ff6f00;
+  color: #ff7b00;
 }
 
 a {
   font-weight: 500;
-  color: #ff6f00;
+  color: #ff7b00;
   text-decoration: inherit;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: #ff8f20;
+  color: #ff9b30;
 }
 
 button {
@@ -77,19 +92,20 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #4a148c;
+  background-color: #1e0e2a;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 button:hover {
-  background-color: #6a1bb0;
-  border-color: #ff6f00;
+  background-color: #2e1e3a;
+  border-color: #ff7b00;
+  box-shadow: 0 0 10px rgba(255, 123, 0, 0.3);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 2px solid #ff6f00;
+  outline: 2px solid #ff7b00;
   outline-offset: 2px;
 }
