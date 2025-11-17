@@ -1,10 +1,10 @@
-import { Home, ListTodo, BarChart3, Target, User } from 'lucide-react';
+import { Ghost, ListTodo, Skull, Flame, Calendar, Settings } from 'lucide-react';
 
 export const navItems = [
   {
     label: 'Dashboard',
     path: '/dashboard',
-    icon: Home,
+    icon: Ghost,
   },
   {
     label: 'Tasks',
@@ -12,18 +12,23 @@ export const navItems = [
     icon: ListTodo,
   },
   {
-    label: 'Review',
-    path: '/review',
-    icon: BarChart3,
-  },
-  {
     label: 'Goals',
     path: '/goals',
-    icon: Target,
+    icon: Flame,
   },
   {
-    label: 'Profile',
-    path: '/profile',
-    icon: User,
+    label: 'Planner',
+    path: '/planner',
+    icon: Calendar,
+  },
+  {
+    label: 'Review',
+    path: '/review',
+    icon: Skull,
+  },
+  {
+    label: 'Settings',
+    path: '/settings',
+    icon: Settings,
   },
 ];
