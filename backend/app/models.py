@@ -13,6 +13,7 @@ class Goal(Base):
     title = Column(String, nullable=False)
     description = Column(String)
     deadline = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     # A goal can have multiple tasks
     tasks = relationship(
@@ -30,11 +31,13 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String)
+    focus_level = Column(String, default="shallow")
     is_completed = Column(Boolean, default=False)
 
     # Time estimate and actual time spent on the task
     estimated_minutes = Column(Integer)
     actual_minutes = Column(Integer)
+    deadline = Column(DateTime)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -75,6 +78,9 @@ class Subtask(Base):
 
     title = Column(String, nullable=False)
     is_completed = Column(Boolean, default=False)
+    estimated_minutes = Column(Integer)
+    deadline = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     # Connects this subtask back to its parent task
     task = relationship(

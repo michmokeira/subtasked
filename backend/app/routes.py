@@ -27,6 +27,15 @@ def get_goal(goal_id: int, db: Session = Depends(get_db)):
 
     return goal
 
+@router.patch("/goals/{goal_id}", response_model=schemas.Goal)
+def update_goal(goal_id: int, goal: schemas.GoalUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_goal(db, goal_id, goal)
+
+    if not updated:
+        raise HTTPException(status_code=404, detail="Goal not found")
+
+    return updated
+
 
 @router.delete("/goals/{goal_id}")
 def delete_goal(goal_id: int, db: Session = Depends(get_db)):
@@ -53,6 +62,10 @@ def get_goal_progress(goal_id: int, db: Session = Depends(get_db)):
 
 @router.post("/tasks", response_model=schemas.Task)
 def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
+    try:
+        return crud.create_task(db, task)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
     return crud.create_task(db, task)
 
 @router.get("/tasks", response_model=list[schemas.Task])
@@ -67,17 +80,37 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     return task
 
 @router.patch("/tasks/{task_id}", response_model=schemas.Task)
-def update_task(
-    task_id: int,
-    task: schemas.TaskUpdate,
-    db: Session = Depends(get_db)
-):
-    updated = crud.update_task(db, task_id, task)
+def update_task( task_id: int, task: schemas.TaskUpdate, db: Session = Depends(get_db)):
+    try:
+        updated = crud.update_task(db, task_id, task)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
 
     if not updated:
         raise HTTPException(status_code=404, detail="Task not found")
 
     return updated
+
+@router.patch("/tasks/{task_id}/incomplete", response_model=schemas.Task)
+def mark_task_incomplete(task_id: int, db: Session = Depends(get_db)):
+    try:
+        updated = crud.mark_task_incomplete(db, task_id)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+    if not updated:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    return updated
+
+@router.get("/tasks/{task_id}/progress", response_model=schemas.TaskProgress)
+def get_task_progress(task_id: int, db: Session = Depends(get_db)):
+    progress = crud.get_task_progress(db, task_id)
+
+    if progress is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    return {"task_id": task_id, "progress": progress}
 
 @router.delete("/tasks/{task_id}")
 def delete_task(task_id: int, db: Session = Depends(get_db)):
@@ -116,6 +149,13 @@ def complete_subtask(subtask_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Subtask not found")
     return updated
 
+@router.patch("/subtasks/{subtask_id}/incomplete", response_model=schemas.Subtask)
+def mark_subtask_incomplete(subtask_id: int, db: Session = Depends(get_db)):
+    updated = crud.mark_subtask_incomplete(db, subtask_id)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Subtask not found")
+    return updated
+
 @router.get("/subtasks/{subtask_id}", response_model=schemas.Subtask)
 def get_subtask(subtask_id: int, db: Session = Depends(get_db)):
     subtask = crud.get_subtask_by_id(db, subtask_id)
@@ -129,7 +169,7 @@ def get_subtask(subtask_id: int, db: Session = Depends(get_db)):
 @router.patch("/subtasks/{subtask_id}", response_model=schemas.Subtask)
 def update_subtask(
     subtask_id: int,
-    subtask: schemas.SubtaskCreate,
+    subtask: schemas.SubtaskUpdate,
     db: Session = Depends(get_db)
 ):
     updated = crud.update_subtask(db, subtask_id, subtask)

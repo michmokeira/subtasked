@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import List, Optional
+from typing import List, Optional, Literal
 from datetime import datetime
 
 
@@ -7,6 +7,8 @@ from datetime import datetime
 
 class SubtaskBase(BaseModel):
     title: str
+    estimated_minutes: Optional[int] = Field(default=None, ge=0)
+    deadline: Optional[datetime] = None
 
 
 class SubtaskCreate(SubtaskBase):
@@ -19,6 +21,11 @@ class Subtask(SubtaskBase):
 
     # Allows Pydantic to read data from SQLAlchemy model attributes
     model_config = ConfigDict(from_attributes=True)
+
+class SubtaskUpdate(BaseModel):
+    title: Optional[str] = None
+    estimated_minutes: Optional[int] = None
+    deadline: Optional[datetime] = None
 
 
 # -------- Goal --------
@@ -39,9 +46,18 @@ class Goal(GoalBase):
     # Allows Pydantic to read data from SQLAlchemy model attributes
     model_config = ConfigDict(from_attributes=True)
 
+class GoalUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    deadline: Optional[datetime] = None
+
 
 class GoalProgress(BaseModel):
     goal_id: int
+    progress: int
+
+class TaskProgress(BaseModel):
+    task_id: int
     progress: int
 
 
@@ -50,12 +66,17 @@ class GoalProgress(BaseModel):
 class TaskBase(BaseModel):
     title: str
     description: Optional[str] = None
-
+    
     # Time estimate is optional
-    estimated_minutes: Optional[int] = None
+    estimated_minutes: Optional[int] = Field(default=None, ge=0)
+    actual_minutes: Optional[int] = Field(default=None, ge=0)  
 
     # A task can exist without belonging to a goal
     goal_id: Optional[int] = None
+
+    
+    deadline: Optional[datetime] = None
+    focus_level: Optional[Literal["shallow", "deep"]] = "shallow"  # Allowed focus levels
 
 
 class TaskCreate(TaskBase):
@@ -65,7 +86,10 @@ class TaskCreate(TaskBase):
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    estimated_minutes: Optional[int] = None
+    estimated_minutes: Optional[int] = Field(default=None, ge=0)
+    actual_minutes: Optional[int] = Field(default=None, ge=0)
+    deadline: Optional[datetime] = None
+    focus_level: Optional[Literal["shallow", "deep"]] = None
     goal_id: Optional[int] = None
 
 
@@ -77,7 +101,7 @@ class Task(TaskBase):
 
     # A task response can include its subtasks
     subtasks: List[Subtask] = Field(default_factory=list)
-
+  
     # Allows Pydantic to read data from SQLAlchemy model attributes
     model_config = ConfigDict(from_attributes=True)
 

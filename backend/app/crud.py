@@ -6,13 +6,23 @@ from . import models, schemas
 # ----------- Task CRUD -----------
 
 def create_task(db: Session, task: schemas.TaskCreate):
+    # Ensures the goal esist in task belongs to one
+    if task.goal_id is not None:
+        goal = get_goal_by_id(db, task.goal_id)
+
+        if not goal:
+            raise ValueError("Goal not found.")
+
     # Create a new Task database object from the validated API data
     db_task = models.Task(
         title=task.title,
         description=task.description,
         estimated_minutes=task.estimated_minutes,
-        goal_id=task.goal_id
-    )
+        actual_minutes=task.actual_minutes,
+        goal_id=task.goal_id,
+        deadline=task.deadline,
+        focus_level=task.focus_level
+)
 
     db.add(db_task)
     db.commit()
@@ -40,6 +50,13 @@ def update_task(db: Session, task_id: int, task: schemas.TaskUpdate):
 
      # Update only the fields that were provided
     update_data = task.model_dump(exclude_unset=True)
+
+    # If the goal is being changed, make sure that the new goal exists
+    if "goal_id" in update_data and update_data["goal_id"] is not None:
+        goal = get_goal_by_id(db, update_data["goal_id"])
+
+        if not goal:
+            raise ValueError("Goal not found.")
 
     for field, value in update_data.items():
         setattr(db_task, field, value)
@@ -80,28 +97,58 @@ def mark_task_complete(db: Session, task_id: int):
 
     return task
 
-
-# ----------- Subtask CRUD -----------
-
-def add_subtask(db: Session, task_id: int, subtask: schemas.SubtaskCreate):
-    # Make sure the parent task exists
+def mark_task_incomplete(db: Session, task_id: int):
+    # Find the task
     task = get_task_by_id(db, task_id)
 
     if not task:
         return None
 
-    # Create a new subtask belonging to the task
-    db_subtask = models.Subtask(
-        title=subtask.title,
-        task_id=task_id
+    # A task with subtasks cannot be manually made incomplete if subtasks are complete
+    if task.subtasks:
+        raise ValueError(
+            "Complete subtasks determine task completion. Uncomplete a subtask or add a new subtask"
+            )
+    task.is_completed = False
+
+    db.commit()
+    db.refresh(task)
+    return task
+
+def recalculate_task_completion(task):
+    # Tasks with no subtasks can be completed directly
+    if not task.subtasks:
+        return
+
+    # A task with subtasks is complete only when
+    # every subtask is complete
+    task.is_completed = all(
+        subtask.is_completed
+        for subtask in task.subtasks
     )
 
-    db.add(db_subtask)
-    db.commit()
-    db.refresh(db_subtask)
+def get_task_progress(db: Session, task_id: int):
+    # Find the task
+    task = get_task_by_id(db, task_id)
 
-    return db_subtask
+    if not task:
+        return None
 
+    # A task with no subtasks is either 0% or 100%
+    if not task.subtasks:
+        return 100 if task.is_completed else 0
+
+    completed_subtasks = sum(
+        1 for subtask in task.subtasks
+        if subtask.is_completed
+    )
+
+    return round(
+        (completed_subtasks / len(task.subtasks)) * 100
+    )
+
+
+# ----------- Subtask CRUD -----------
 
 def get_subtask_by_id(db: Session, subtask_id: int):
     # Find one subtask using its ID
@@ -115,7 +162,7 @@ def get_subtask_by_id(db: Session, subtask_id: int):
 def update_subtask(
     db: Session,
     subtask_id: int,
-    subtask: schemas.SubtaskCreate
+    subtask: schemas.SubtaskUpdate
 ):
     # Find the existing subtask
     db_subtask = get_subtask_by_id(db, subtask_id)
@@ -123,7 +170,10 @@ def update_subtask(
     if not db_subtask:
         return None
 
-    db_subtask.title = subtask.title
+    update_data = subtask.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(db_subtask, field, value)
 
     db.commit()
     db.refresh(db_subtask)
@@ -135,9 +185,24 @@ def delete_subtask(db: Session, subtask_id: int):
     # Find the subtask before deleting it
     subtask = get_subtask_by_id(db, subtask_id)
 
-    if subtask:
-        db.delete(subtask)
-        db.commit()
+    if not subtask:
+        return None
+
+    # Keep a reference to the parent task
+    task = subtask.task
+
+    # Remove the subtask from the parent's relationship collection
+    if task:
+        task.subtasks.remove(subtask)
+
+    # Delete the subtask
+    db.delete(subtask)
+
+    # Recalculate the parent task's completion status
+    if task:
+        recalculate_task_completion(task)
+
+    db.commit()
 
     return subtask
 
@@ -152,19 +217,62 @@ def mark_subtask_complete(db: Session, subtask_id: int):
     # Mark the subtask as complete
     subtask.is_completed = True
 
-    # Check whether completing this subtask also completes
-    # the parent task
+    #  Recalculate the completion status of the parent task
     task = subtask.task
 
-    if task and task.subtasks:
-        if all(item.is_completed for item in task.subtasks):
-            task.is_completed = True
+    if task:
+        recalculate_task_completion(task)
 
     db.commit()
     db.refresh(subtask)
 
     return subtask
 
+def mark_subtask_incomplete(db: Session, subtask_id: int):
+    # Find the subtask
+    subtask = get_subtask_by_id(db, subtask_id)
+
+    if not subtask:
+        return None
+
+    # Mark the subtask as incomplete
+    subtask.is_completed = False
+
+    # Recalculate the completion status of the parent task
+    task = subtask.task
+
+    if task:
+        recalculate_task_completion(task)
+
+    db.commit()
+    db.refresh(subtask)
+    return subtask
+
+def add_subtask(db: Session, task_id: int, subtask: schemas.SubtaskCreate):
+    # Make sure the parent task exists
+    task = get_task_by_id(db, task_id)
+
+    if not task:
+        return None
+
+    # Create a new subtask belonging to the task
+    db_subtask = models.Subtask(
+        title=subtask.title,
+        task_id=task_id,
+        estimated_minutes=subtask.estimated_minutes,
+        deadline=subtask.deadline
+    )
+
+    db.add(db_subtask)
+    db.flush()
+
+    # Recalculate the parent task's completion status
+    recalculate_task_completion(task)
+
+    db.commit()
+    db.refresh(db_subtask)
+
+    return db_subtask
 
 # ----------- Goal CRUD -----------
 
@@ -196,6 +304,23 @@ def get_goal_by_id(db: Session, goal_id: int):
         .first()
     )
 
+def update_goal(db: Session, goal_id: int, goal: schemas.GoalUpdate):
+    # Find the existing goal
+    db_goal = get_goal_by_id(db, goal_id)
+
+    if not db_goal:
+        return None
+
+    # Update only the fields that were provided
+    update_data = goal.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(db_goal, field, value)
+
+    db.commit()
+    db.refresh(db_goal)
+    return db_goal
+
 
 def delete_goal(db: Session, goal_id: int):
     # Find the goal before deleting it
@@ -215,20 +340,19 @@ def get_goal_progress(db: Session, goal_id: int):
     if not goal:
         return None
 
-    # Get all tasks belonging to this goal
-    total_tasks = len(goal.tasks)
-
-    # A goal with no tasks has no completed work yet
-    if total_tasks == 0:
+    # A goal with no tasks has no progress yet
+    if not goal.tasks:
         return 0
 
-    completed_tasks = sum(
-        1 for task in goal.tasks
-        if task.is_completed
-    )
+    task_progress_values = []
 
-    # Calculate progress from completed tasks
-    return round((completed_tasks / total_tasks) * 100)
+    for task in goal.tasks:
+        progress = get_task_progress(db, task.id)
+        task_progress_values.append(progress)
+
+    return round(
+        sum(task_progress_values) / len(task_progress_values)
+    )
 
 
 # ----------- Paused / Future Features -----------
